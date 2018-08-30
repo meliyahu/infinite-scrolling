@@ -1,18 +1,11 @@
 var pagination = {
     currentPage: 1,
     lastRow: null,
-    pageSize: 1000
+    pageSize: 100
 };
 
 let skipValue = 0;
-let currPageNumber;
 let prevPageNumber;
-
-// var columnDefs = [
-//     { headerName: 'Name', field: 'name', suppressMenu: true, suppressFilter: true },
-//     { headerName: 'Full Name', field: 'full_name', suppressMenu: true, suppressFilter: true },
-//     { headerName: 'Language', field: 'language', suppressMenu: true, suppressFilter: true }
-// ];
 
 columnDefs = [
     { headerName: 'Survey ID', field: 'surveyId' },
@@ -37,7 +30,7 @@ columnDefs = [
 
 
 var gridOptions = {
-    cacheBlockSize: 1000,
+    cacheBlockSize: 100,
     columnDefs: columnDefs,
     enableServerSideSorting: true,
     enableServerSideFilter: true,
@@ -49,22 +42,28 @@ var gridOptions = {
 };
 
 function onPaginationChanged() {
-    console.log('skipValue=' + skipValue);
-    console.log('limit=' + pagination.pageSize);
-    console.log('currentPage=' + pagination.currentPage);
-    console.log('----------------')
-    // let currPageNumber;
-    // let prevPageNumber;
-
+   
     if (gridOptions.api) {
-
+        
         pagination.currentPage = gridOptions.api.paginationGetCurrentPage() + 1;
 
         if(gridOptions.api.paginationGetCurrentPage() === 0){
-            skipValue = 0  
+            skipValue = 0 
+            prevPageNumber = 1;
         } else {
-            skipValue += pagination.pageSize
+            let thisPageNum = gridOptions.api.paginationGetCurrentPage() + 1;
+            if (thisPageNum >= prevPageNumber){ //we are going forward
+                prevPageNumber = thisPageNum;
+                skipValue += pagination.pageSize;
+            }else { // we are going backward
+                prevPageNumber = thisPageNum;
+                skipValue = skipValue - pagination.pageSize;
+            }
         }
+        console.log('skipValue=' + skipValue);
+        console.log('limit=' + pagination.pageSize);
+        console.log('currentPage=' + pagination.currentPage);
+        console.log('----------------')
     }
 }
 
